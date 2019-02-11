@@ -6,13 +6,13 @@ import (
 
 func TestClient_PostEvent(t *testing.T) {
 	c, err := NewClient(Config{
-		Url: "https://d-app.whispir.cc/a/app-027d30049900adf1/v1/events",
-		AppId: "027d30049900adf1",
-		AppSecret: "pULnwkHww9RuRFTcN9H3E9mAd0gcYBSmzAOqAYSEoBU=",
+		Url:       "https://app.wizardcloud.cn/a/app-033f5501e4000e4b/v1/events",
+		AppId:     "033f5501e4000e4b",
+		AppSecret: "ZBWRGW2n97nn/5n7CeLxhdSV3/POSDlpRQ/cMVIGxhQ=",
 	})
 	if nil != err {
 		t.Fatal(err)
 	}
 
-	t.Log(c.PostEvent("foo", map[string]string{"to":"haborhuang@whispir.cc", "content":"hello world"}, "application/json"))
+	t.Log(c.PostEvent("whoru", nil, "application/json"))
 }
