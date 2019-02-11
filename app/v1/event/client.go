@@ -16,6 +16,7 @@ import (
 	"github.com/satori/go.uuid"
 	"path"
 	"errors"
+	//"strconv"
 )
 
 type Config struct {
@@ -28,8 +29,8 @@ type Config struct {
 }
 
 type Client struct {
-	apiUrl *url.URL
-	appId string
+	apiUrl    *url.URL
+	appId     string
 	appSecret string
 }
 
@@ -40,8 +41,8 @@ func NewClient(c Config) (*Client, error) {
 	}
 
 	return &Client{
-		apiUrl: u,
-		appId: c.AppId,
+		apiUrl:    u,
+		appId:     c.AppId,
 		appSecret: c.AppSecret,
 	}, nil
 }
@@ -79,7 +80,7 @@ func (c *Client) postEvent(name string, event interface{}, contentType string, s
 	}
 
 	if secure {
-		u.RawQuery = c.genQuery(u.Query()).Encode()
+		u.RawQuery = c.genQuery(u.Query(), "").Encode()
 	}
 
 	resp, err := http.Post(u.String(), contentType, buf)
@@ -100,7 +101,7 @@ func (c *Client) postEvent(name string, event interface{}, contentType string, s
 		perr.Status = resp.StatusCode
 		return perr
 	}
-
+	
 	return nil
 }
 
@@ -125,13 +126,20 @@ type eventEncoder interface {
 	Encode(interface{}) error
 }
 
-func (c *Client) genQuery(q url.Values) url.Values {
+func (c *Client) genQuery(q url.Values, wscPlain string) url.Values {
 	q.Set("ts", time.Now().UTC().Format(time.RFC3339))
+	//q.Set("ts", strconv.FormatInt(time.Now().UTC().Unix(), 10)) //或者设置为10位时间戳
 	q.Set("signNonce", uuid.NewV4().String())
 	q.Set("signMethod", methodHmacSha1)
 	q.Set("signVer", "v1.0")
 
 	plain := fmt.Sprintf("%s&%s&%s", url.QueryEscape(c.appId), apiMethod, q.Encode())
+
+	//若明文不敏感的话，也可以直接指定明文
+	if wscPlain != "" {
+		plain = wscPlain
+		q.Set("wscPlain", wscPlain)
+	}
 	q.Set("sign", c.sign(plain))
 
 	return q
